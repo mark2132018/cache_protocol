@@ -65,9 +65,9 @@ mod cache_protocol {
         reward: u128
     }
 
-    #[ink(event)]
-    // #[derive(scale::Encode, scale::Decode)]
-    // #[cfg_attr(feature = "std", derive(scale_info::TypeInfo, StorageLayout))]
+    // #[ink(event)]
+    #[derive(scale::Encode, scale::Decode)]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo, StorageLayout))]
     pub struct Exit {
         node_acc: AccountId,
     }
@@ -278,7 +278,7 @@ mod cache_protocol {
         }
 
         #[ink(message)]
-        pub fn exit(&mut self) -> Result<(), Error> {
+        pub fn exit(&mut self) -> Result<Exit, Error> {
             let sender = self.env().caller();
             let node_info = self.node.get(sender).ok_or(Error::Custom("Node not found!".into()))?;
             if !node_info.created {
@@ -293,10 +293,13 @@ mod cache_protocol {
             self.cache_reward.remove(sender);
             self.token_bonded.remove(node_info.token_id);
             
-            <EnvAccess<'_, DefaultEnvironment> as EmitEvent<CacheProtocol>>::emit_event::<Exit>(self.env(), Exit {
-                node_acc: sender,
-            });
-            Ok(())
+            // <EnvAccess<'_, DefaultEnvironment> as EmitEvent<CacheProtocol>>::emit_event::<Exit>(self.env(), Exit {
+            //     node_acc: sender,
+            // });
+            
+            Ok(Exit {
+                node_acc: sender
+            })
         }
         
         #[ink(message)]
